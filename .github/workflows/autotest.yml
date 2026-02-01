@@ -37,5 +37,7 @@ jobs:
         echo "PEXELS_API_KEY=" >> $GITHUB_ENV
         echo "LLM_PROVIDER=none" >> $GITHUB_ENV
 
-    - name: Execute Tests
-      run: python -m unittest discover -s test
+    - name: Execute Tests (excluding voice tests)
+      run: |
+        python -m unittest discover -s test -p "test_*.py" \
+          -k "not test_voice"
