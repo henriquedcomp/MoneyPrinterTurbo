@@ -1,0 +1,41 @@
+name: Run Automated Tests
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg imagemagick
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        # instalar deps extras usadas pelos testes, se houver
+        pip install moviepy pytest
+
+    - name: Disable AI / External API Integration
+      run: |
+        # define variáveis de ambiente em branco para evitar chamadas
+        echo "OPENAI_API_KEY=" >> $GITHUB_ENV
+        echo "AZURE_API_KEY=" >> $GITHUB_ENV
+        echo "WHISPER_MODEL_PATH=" >> $GITHUB_ENV
+        echo "PEXELS_API_KEY=" >> $GITHUB_ENV
+        echo "LLM_PROVIDER=none" >> $GITHUB_ENV
+
+    - name: Execute Tests
+      run: python -m unittest discover -s test
